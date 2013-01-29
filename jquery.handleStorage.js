@@ -249,7 +249,16 @@
    if (typeof o.data[o.appID][o.form]==='object'){
     $.each($('#'+o.form+' > :input'), function(k, v){
      if ((vStr(v.name)!==false)&&(vStr(o.data[o.appID][o.form][v.name])!==false)){
-      ret[v.name] = ((o.aes)&&(o.data[o.appID][o.form]['uuid'])&&(x!==false)) ? GibberishAES.dec(o.data[o.appID][o.form][v.name], __strIV(o.data[o.appID][o.form]['uuid'])) : o.data[o.appID][o.form][v.name];
+      if (typeof(o.data[o.appID][o.form][v.name])=='object') {
+       var _x = []; var _i = 0;
+       $.each(o.data[o.appID][o.form][v.name], function(a, b){
+        _x[_i] = ((o.aes)&&(o.data[o.appID][o.form]['uuid'])&&(x!==false)) ? GibberishAES.dec(b, _s(uid(), __strIV(o.data[o.appID][o.form]['uuid']))) : b;
+       });
+       ret[v.name] = _x;
+       __r(ret[v.name]);
+      } else {
+       ret[v.name] = ((o.aes)&&(o.data[o.appID][o.form]['uuid'])&&(x!==false)) ? GibberishAES.dec(o.data[o.appID][o.form][v.name], _s(uid(), __strIV(o.data[o.appID][o.form]['uuid']))) : o.data[o.appID][o.form][v.name];
+      }
      }
     });
    }
@@ -287,7 +296,7 @@
      if (/checkbox|radio/.test(v.type)){
       x[o.form][v.name]=gG(o,v,v.type,x[o.form]['uuid']);
      } else {
-      x[o.form][v.name] = ((o.aes)&&(x[o.form]['uuid'])) ? GibberishAES.enc(v.value, __strIV(x[o.form]['uuid'])) : v.value;
+      x[o.form][v.name] = ((o.aes)&&(x[o.form]['uuid'])) ? GibberishAES.enc(v.value, _s(uid(), __strIV(x[o.form]['uuid']))) : v.value;
      }
     }
    });
@@ -306,7 +315,7 @@
    */
   var gG = function(o, obj, t, key){
    return $('#'+o.form+' > input:'+t+':checked').map(function(){
-    return ((o.aes)&&(key)) ? GibberishAES.enc(this.value, __strIV(key)) : this.value;
+    return ((o.aes)&&(key)) ? GibberishAES.enc(this.value, _s(uid(), __strIV(key))) : this.value;
    }).get();
   }
   
@@ -376,6 +385,37 @@
     uuid.join('').replace(/-/g, '').split('',len).join('') : uuid.join('');
   }
 
+  /**
+   * @function uid
+   * @abstract Generate uid
+   */
+   var uid = function(){
+		return window.navigator.appName+
+				window.navigator.appCodeName+
+				window.navigator.product+
+				window.navigator.productSub+
+				window.navigator.appVersion+
+				window.navigator.buildID+
+				window.navigator.userAgent+
+				window.navigator.language+
+				window.navigator.platform+
+				window.navigator.oscpu;
+	}
+
+  /**
+   * @function _s
+   * @abstract Strengthen key
+   */
+  var _s = function(str, slt){
+    var _h = []; _h[0] = GibberishAES.Hash.MD5(str);
+    var _r = []; _r = _h[0]; var _d;
+    for (i = 1; i < 3; i++){
+        _h[i] = GibberishAES.Hash.MD5(_h[i - 1].concat(slt));
+        _d = _r.concat(_h[i]);
+    }
+    return JSON.stringify(_d);
+  }
+  
   /**
    * @function hK
    * @abstract Performs key generation or retrieval
