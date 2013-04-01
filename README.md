@@ -10,8 +10,8 @@ prior to form submission.
 
 ## REQUIREMENTS:
 * jQuery libraries (required - http://www.jquery.com)
-* jQuery cookie plugin (optional - http://plugins.jquery.com/files/jquery.cookie.js.txt)
-* Gibberish-AES libraries (optional - https://github.com/mdp/gibberish-aes)
+* jQuery cookie plugin (optional - https://github.com/carhartl/jquery-cookie)
+* SJCL libraries (optional - https://github.com/bitwiseshiftleft/sjcl)
 
 
 ## FEATURES:
@@ -76,7 +76,7 @@ $('#form').handleStorage({interval:30000});
 #### Default usage using HTML5 localStorage with AES encryption
 If you wish to use persistent storage and provide some additional security
 to the saved form data a transparent AES-CBC encryption method is available.
-This option does require the Gibberish-AES plug-in as noted above.
+This option does require the SJCL plug-in as noted above.
 
 ```javascript
 $('#form').handleStorage({aes:true});
