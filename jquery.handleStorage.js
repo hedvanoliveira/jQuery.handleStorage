@@ -88,6 +88,7 @@
       svF(opts);
      });
      setInterval(function(){svF(opts);}, opts.interval);
+
      return true;
     } else {
      return false;
@@ -252,12 +253,12 @@
       if (typeof(o.data[o.appID][o.form][v.name])=='object') {
        var _x = []; var _i = 0;
        $.each(o.data[o.appID][o.form][v.name], function(a, b){
-        _x[_i] = ((o.aes)&&(o.data[o.appID][o.form]['uuid'])&&(x!==false)) ? GibberishAES.dec(b, _s(uid(), __strIV(o.data[o.appID][o.form]['uuid']))) : b;
+        //_x[_i] = ((o.aes)&&(o.data[o.appID][o.form]['uuid'])&&(x!==false)) ? sjcl.decrypt(_s(uid(), b)) : b;
        });
        ret[v.name] = _x;
        __r(ret[v.name]);
       } else {
-       ret[v.name] = ((o.aes)&&(o.data[o.appID][o.form]['uuid'])&&(x!==false)) ? GibberishAES.dec(o.data[o.appID][o.form][v.name], _s(uid(), __strIV(o.data[o.appID][o.form]['uuid']))) : o.data[o.appID][o.form][v.name];
+       //ret[v.name] = ((o.aes)&&(o.data[o.appID][o.form]['uuid'])&&(x!==false)) ? sjcl.decrypt(_s(uid(), o.data[o.appID][o.form][v.name])) : o.data[o.appID][o.form][v.name];
       }
      }
     });
@@ -294,14 +295,14 @@
    $.each($('#'+o.form+' > :input'), function(k, v){
     if ((vStr(v.value)!==false)&&(vStr(v.name)!==false)){
      if (/checkbox|radio/.test(v.type)){
-      x[o.form][v.name]=gG(o,v,v.type,x[o.form]['uuid']);
+      x[o.form][v.name] = gG(o,v,v.type,x[o.form]['uuid']);
      } else {
-      x[o.form][v.name] = ((o.aes)&&(x[o.form]['uuid'])) ? GibberishAES.enc(v.value, _s(uid(), __strIV(x[o.form]['uuid']))) : v.value;
+      x[o.form][v.name] = v.value;
      }
     }
    });
-   o.data[o.appID] = (sChk(o.data[o.appID])>0) ?
-    $.extend({}, o.data[o.appID], x) : x;
+   o.data[o.appID] = (sChk(o.data[o.appID]) > 0) ? $.extend({}, o.data[o.appID], x) : x;
+   //o.data[o.appID] = ((o.aes)&&(x[o.form]['uuid'])) ? sjcl.encrypt(_s(uid(), JSON.stringify(x))) : x;
    if (sI(o.storage, o.appID, JSON.stringify(o.data[o.appID]))){
     ((o.callback)&&($.isFunction(o.callback))) ? o.callback.call($(this)) : false;
    } else {
@@ -315,10 +316,11 @@
    */
   var gG = function(o, obj, t, key){
    return $('#'+o.form+' > input:'+t+':checked').map(function(){
-    return ((o.aes)&&(key)) ? GibberishAES.enc(this.value, _s(uid(), __strIV(key))) : this.value;
+    //return ((o.aes)&&(key)) ? sjcl.encrypt(_s(uid(), this.value, __strIV(key))) : this.value;
+    return this.value;
    }).get();
   }
-  
+
   /**
    * @function vStr
    * @abstract Verifies string integrity
@@ -352,8 +354,8 @@
   var vO = function(opts){
    var ret = true;
    if (opts.aes){
-    if (!$.isFunction(GibberishAES.enc)){
-     console.log('AES use specified but required libraries not available. Please include the Gibberish-AES libs...');
+    if (!$.isFunction(sjcl.encrypt)){
+     console.log('AES use specified but required libraries not available. Please include the SJCL libs...');
      ret = false;
     }
    }
@@ -390,7 +392,7 @@
    * @abstract Generate uid
    */
    var uid = function(){
-		return window.navigator.appName+
+		var _x = window.navigator.appName+
 				window.navigator.appCodeName+
 				window.navigator.product+
 				window.navigator.productSub+
@@ -400,6 +402,7 @@
 				window.navigator.language+
 				window.navigator.platform+
 				window.navigator.oscpu;
+        return _x.replace(/\s/, '');
 	}
 
   /**
@@ -407,15 +410,15 @@
    * @abstract Strengthen key
    */
   var _s = function(str, slt){
-    var _h = []; _h[0] = GibberishAES.Hash.MD5(str);
+    var _h = []; _h[0] = sjcl.hash.sha256.hash(str);
     var _r = []; _r = _h[0]; var _d;
     for (i = 1; i < 3; i++){
-        _h[i] = GibberishAES.Hash.MD5(_h[i - 1].concat(slt));
+        _h[i] = sjcl.hash.sha256.hash(_h[i - 1].concat(slt));
         _d = _r.concat(_h[i]);
     }
-    return JSON.stringify(_d);
+    return JSON.stringify(sjcl.codec.hex.fromBits(_d));
   }
-  
+
   /**
    * @function hK
    * @abstract Performs key generation or retrieval
