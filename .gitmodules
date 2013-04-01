@@ -1,6 +1,6 @@
-[submodule "js/3rd-party/jquery-cookie"]
-	path = js/3rd-party/jquery-cookie
-	url = https://github.com/carhartl/jquery-cookie
-[submodule "js/3rd-party/gibberish-aes"]
-	path = js/3rd-party/gibberish-aes
-	url = https://github.com/mdp/gibberish-aes
+[submodule "3rd-party/gibberish-aes"]
+	path = 3rd-party/gibberish-aes
+	url = https://github.com/mdp/gibberish-aes.git
+[submodule "3rd-party/jquery-cookie"]
+	path = 3rd-party/jquery-cookie
+	url = https://github.com/carhartl/jquery-cookie.git
