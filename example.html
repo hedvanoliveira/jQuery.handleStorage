@@ -16,50 +16,6 @@
  <!-- Load the jQuery handleStorage plugin -->
  <script src="jquery.handleStorage.js"></script>
 
- <script>
-/*
-  var _id = uid();
-  var _s = _salt(_id, _strIV(_id));
-
-  console.log('Key: '+_s);
-
-  var _e = sjcl.encrypt(_s, JSON.stringify({'key-01':'value-01','key-02':'value-02','key-03':'value-03'}));
-  var _d = sjcl.decrypt(_s, _e);
-
-  console.log('Encrypted: '+_e);
-  console.log('Decrypted: '+_d);
-
-  function _salt(str, slt){
-    var _h = []; _h[0] = sjcl.hash.sha256.hash(str);
-    var _r = []; _r = _h[0]; var _d;
-    for (i = 1; i < 3; i++){
-        _h[i] = sjcl.hash.sha256.hash(_h[i - 1].concat(slt));
-        _d = _r.concat(_h[i]);
-    }
-    return JSON.stringify(sjcl.codec.hex.fromBits(_d));
-  }
-
-  function _strIV(s){
-   return (s) ?
-    encodeURI(s.replace(/-/gi, '').substring(16,Math.ceil(16*s.length)%s.length)) :
-    false;
-  }
-
-  function uid(){
-	var _x = window.navigator.appName+
-			window.navigator.appCodeName+
-			window.navigator.product+
-			window.navigator.productSub+
-			window.navigator.appVersion+
-			window.navigator.buildID+
-			window.navigator.userAgent+
-			window.navigator.language+
-			window.navigator.platform+
-			window.navigator.oscpu;
-   return _x.replace(/\s/gi, '');
-  }
-*/
- </script>
 </head>
 
 <body>
@@ -79,7 +35,7 @@
   <script>
    var $j = jQuery.noConflict();
    $j(document).ready(function() {
-    //$j('#default').handleStorage();
+    $j('#default').handleStorage();
    });
   </script>
   <div id="contact-form" class="clearfix">
@@ -118,7 +74,7 @@
   <script>
    var $j = jQuery.noConflict();
    $j(document).ready(function() {
-    //$j('#sessions').handleStorage({storage:'sessionStorage'});
+    $j('#sessions').handleStorage({storage:'sessionStorage'});
    });
   </script>
   <div id="contact-form" class="clearfix">
@@ -157,7 +113,7 @@
   <script>
    var $j = jQuery.noConflict();
    $j(document).ready(function() {
-    //$j('#cookies').handleStorage({storage:'cookies'});
+    $j('#cookies').handleStorage({storage:'cookies'});
    });
   </script>
   <div id="contact-form" class="clearfix">
@@ -235,7 +191,7 @@
   <script>
    var $j = jQuery.noConflict();
    $j(document).ready(function() {
-    //$j('#sessions-aes').handleStorage({storage:'sessionStorage',aes:true});
+    $j('#sessions-aes').handleStorage({storage:'sessionStorage',aes:true});
    });
   </script>
   <div id="contact-form" class="clearfix">
@@ -274,7 +230,7 @@
   <script>
    var $j = jQuery.noConflict();
    $j(document).ready(function() {
-    //$j('#cookies-aes').handleStorage({storage:'cookies',aes:true});
+    $j('#cookies-aes').handleStorage({storage:'cookies',aes:true});
    });
   </script>
   <div id="contact-form" class="clearfix">
@@ -313,7 +269,7 @@
   <script>
    var $j = jQuery.noConflict();
    $j(document).ready(function() {
-    //$j('#default-success').handleStorage({callback:function(){$j('#default-success').append('Form data saved successfully');}});
+    $j('#default-success').handleStorage({callback:function(){$j('#default-success').append('Form data saved successfully');}});
    });
   </script>
   <div id="contact-form" class="clearfix">
@@ -352,7 +308,7 @@
   <script>
    var $j = jQuery.noConflict();
    $j(document).ready(function() {
-    //$j('#default-pre').handleStorage({preCallback:function(){$j('#default-pre').append('Executing prior to form save');}});
+    $j('#default-pre').handleStorage({preCallback:function(){$j('#default-pre').append('Executing prior to form save');}});
    });
   </script>
   <div id="contact-form" class="clearfix">
@@ -391,7 +347,7 @@
   <script>
    var $j = jQuery.noConflict();
    $j(document).ready(function() {
-    //$j('#default-error').handleStorage({errCallback:function(){$j('#default-error').append('An error occured during save, this should not happen');}});
+    $j('#default-error').handleStorage({errCallback:function(){$j('#default-error').append('An error occured during save, this should not happen');}});
    });
   </script>
   <div id="contact-form" class="clearfix">

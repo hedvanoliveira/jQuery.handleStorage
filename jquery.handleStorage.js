@@ -91,9 +91,9 @@
 			 * @returns {Boolean} true/false
 			 */
 			init: function(o){
-				_log.init();
-                 o.uuid = (o.aes) ? _crypto.key(o) : o.uuid;
-				return _setup.bind(o, o.element);
+                _log.init();
+                o.uuid = (o.aes) ? _crypto.key(o) : o.uuid;
+                return _setup.bind(o, o.element);
 			},
 
 			/**
@@ -122,7 +122,7 @@
 			bind: function(o, d){
 				var _d = false;
 				if ((d).is('form')){
-					(o.debug) ? _log.debug(o.appID, '_setup.get: Currently bound to form') : false;
+					(o.debug) ? _log.debug(o.appID, '_setup.get: Currently bound to form ('+d.attr('id')+')') : false;
 					$(d).on('submit', function(e){
 						e.preventDefault();
 						_d = _libs.form(o, d);
@@ -293,7 +293,7 @@
 				 */
 				save: function(o, k, v){
 					var d = new Date();
-					d.setTime(d.getTime()+(30*24*60*60*1000));
+					d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
 					document.cookie = k+'='+v+';expires='+d.toGMTString()+';path=/;domain='+this.domain();
 					(o.debug) ? _log.debug(o.appID, '_cookies.save: '+k+' => '+v) : false;
 					return true;
@@ -435,7 +435,8 @@
 			key: function(o) {
                 (o.debug) ? _log.debug(o.appID, '_crypto.key: Prepared key') : false;
 
-				return _crypto.salt(_crypto.uid());
+                var _p = _crypto.uid();
+				return sjcl.codec.hex.fromBits(sjcl.misc.pbkdf2(_p, _crypto.salt(_p), 1000, 256));
 			},
 
 			/**
