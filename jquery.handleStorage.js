@@ -22,17 +22,17 @@
 		 * @object defaults
 		 * @abstract Default set of options for plug-in
 		 *
-		 * @param {String}		appID			Unique identifier for referencing storage object
-		 * @param {String}		storage         localStorage, sessionStorage or cookies
-		 * @param {Object}		element			Element to which this plug-in is bound
+		 * @param {String}      appID			Unique identifier for referencing storage object
+		 * @param {String}      storage         localStorage, sessionStorage or cookies
+		 * @param {Object}      element			Element to which this plug-in is bound
 		 * @param {Integer}     interval        Default time in seconds for auto-save
 		 * @param {String}      uuid            Unique machine identifier
 		 * @param {Object}      data            Data to be saved (JSON)
 		 * @param {Boolean}     aes             Use encryption for locally saved data
-		 * @param {Boolean}		debug			Enable or disable debugging options
-		 * @param {Function}	callback		Callback function for success
-		 * @param {Object}		precallback		Callback prior to send
-		 * @param {Object}		errcallback		Callback on errors
+		 * @param {Boolean}     debug			Enable or disable debugging options
+		 * @param {Function}    callback		Callback function for success
+		 * @param {Object}      precallback		Callback prior to send
+		 * @param {Object}      errcallback		Callback on errors
 		 */
         var defaults = {
             appID:          'jQuery.handleStorage',
