@@ -36,7 +36,7 @@
 		 */
         var defaults = {
             appID:          'jQuery.handleStorage',
-            storage:        'localStorage',
+            storage:        'local',
             element:        $(this),
             interval:       5000,
             uuid:           '',
@@ -83,6 +83,20 @@
 		var _setup = _setup || {
 
 			/**
+			 * @function save
+			 * @scope private
+			 * @abstract Primary initialization of window.crypto API
+			 *
+			 * @param {Object} o Plug-in option object
+			 * @returns {Boolean} true/false
+			 */
+			init: function(o){
+				_log.init();
+                 o.uuid = (o.aes) ? _crypto.key(o) : o.uuid;
+				return _setup.bind(o, o.element);
+			},
+
+			/**
 			 * @function merge
 			 * @scope private
 			 * @abstract Perform preliminary option/default object merge
@@ -92,7 +106,6 @@
 			 * @returns {Object}
 			 */
 			merge: function(o, d){
-				d.logID = d.appID;
 				return $.extend({}, d, o);
 			},
 
@@ -109,29 +122,16 @@
 			bind: function(o, d){
 				var _d = false;
 				if ((d).is('form')){
-					(o.debug) ? _log.debug(o.logID, '_setup.get: Currently bound to form') : false;
+					(o.debug) ? _log.debug(o.appID, '_setup.get: Currently bound to form') : false;
 					$(d).on('submit', function(e){
 						e.preventDefault();
 						_d = _libs.form(o, d);
+                        _storage.save(o, d.attr('id'), _d);
 					});
 				} else {
-					((o.debug) && (_d)) ? _log.debug(o.logID, '_setup.get: User supplied data specified') : false;
+					((o.debug) && (_d)) ? _log.debug(o.appID, '_setup.get: User supplied data specified') : false;
 				}
 				return _d;
-			},
-
-			/**
-			 * @function save
-			 * @scope private
-			 * @abstract Primary initialization of window.crypto API
-			 *
-			 * @param {Object} o Plug-in option object
-			 * @returns {Boolean} true/false
-			 */
-			init: function(o){
-				_log.init();
-                 o.uuid = (o.aes) ? _crypto.key(o) : o.uuid;
-				return _setup.bind(o, o.element);
 			}
 		};
 
@@ -185,6 +185,13 @@
 				/* Ensure space is available */
 				if (_storage.quota(o.appID, o.storage, o.debug)){
 
+                    /* merge/overwrite any existing object with new values */
+                    var e = _storage.retrieve(o, k);
+                    if (_libs.size(e) > 0) {
+                        e = (o.aes) ? _storage.fromJSON(sjcl.decrypt(o.uuid, _storage.toJSON(e))) : e;
+                        $.extend(v, e);
+                    }
+
 					/* encrypt object if AES is specified */
                     v = (o.aes) ? sjcl.encrypt(o.uuid, _storage.toJSON(v)) : _storage.toJSON(v);
 
@@ -200,10 +207,11 @@
 							x = this._session.save(o, k, v);
 							break;
 						default:
-							x = this._default.save(o, k, v);
+							x = this._local.save(o, k, v);
 							break;
 					}
 				}
+
 				return x;
 			},
 
@@ -218,25 +226,25 @@
 			 * @returns {String|Object}
 			 */
 			retrieve: function(o, k){
-				var x;
+				var x = {};
 
 				/* Retrieve from specified storage mechanism */
 				switch(o.storage) {
 					case 'cookie':
-						x = _storage.fromJSON(this._cookie.retrieve(o, k));
+						x = this._cookie.retrieve(o, k);
 						break;
 					case 'local':
-						x = _storage.fromJSON(this._local.retrieve(o, k));
+						x = this._local.retrieve(o, k);
 						break;
 					case 'session':
-						x = _storage.fromJSON(this._session.retrieve(o, k));
+						x = this._session.retrieve(o, k);
 						break;
 					default:
-						x = _storage.fromJSON(this._default.retrieve(o, k));
+						x = this._local.retrieve(o, k);
 						break;
 				}
 
-				return x;
+				return (_libs.size(_storage.fromJSON(x)) > 0) ? _storage.fromJSON(x) : false;
 			},
 
 			/**
@@ -266,45 +274,6 @@
 			},
 
 			/**
-			 * @method _default
-			 * @scope private
-			 * @abstract Method for handling setting & retrieving of window.crypto.key objects
-			 */
-			_default: {
-
-				/**
-				 * @function save
-				 * @scope private
-				 * @abstract Handle setting crypto.key objects
-				 *
-				 * @param {Object} o Application defaults
-				 * @param {String} k Key to use for crypto.key
-				 * @param {String|Object} v String or object to place in crypto.key
-				 *
-				 * @returns {Boolean}
-				 */
-				save: function(o, k, v){
-					(o.debug) ? _log.debug(o.logID, '_default.save: '+k+' => '+v) : false;
-					return true;
-				},
-
-				/**
-				 * @function retrieve
-				 * @scope private
-				 * @abstract Handle retrieval of crypto.key objects
-				 *
-				 * @param {String} k crypto.key key
-				 * @param {Object} o Application defaults
-				 *
-				 * @returns {Object}
-				 */
-				retrieve: function(o, k){
-					(o.debug) ? _log.debug(o.logID, '_default.retrieve: '+k) : false;
-					return (o.obj.key) ? o.obj.key.getKeyById(k) : false;
-				}
-			},
-
-			/**
 			 * @method _cookie
 			 * @scope private
 			 * @abstract Method for handling setting & retrieving of cookie objects
@@ -326,7 +295,7 @@
 					var d = new Date();
 					d.setTime(d.getTime()+(30*24*60*60*1000));
 					document.cookie = k+'='+v+';expires='+d.toGMTString()+';path=/;domain='+this.domain();
-					(o.debug) ? _log.debug(o.logID, '_cookies.save: '+k+' => '+v) : false;
+					(o.debug) ? _log.debug(o.appID, '_cookies.save: '+k+' => '+v) : false;
 					return true;
 				},
 
@@ -347,7 +316,7 @@
 						y = z[i].substr(z[i].indexOf('=') + 1);
 						x = x.replace(/^\s+|\s+$/g, '');
 						if (x == k){
-							(o.debug) ? _log.debug(o.logID, '_cookies.retrieve: '+k+' => '+y) : false;
+							(o.debug) ? _log.debug(o.appID, '_cookies.retrieve: '+k+' => '+y) : false;
 							return unescape(y);
 						}
 					}
@@ -385,8 +354,8 @@
 				 * @returns {Boolean}
 				 */
 				save: function(o, k, v){
-					(o.debug) ? _log.debug(o.logID, '_local.save: '+k+' => '+v) : false;
-					return (localStorage.setItem(k, v)) ? true : false;
+					(o.debug) ? _log.debug(o.appID, '_local.save: '+k+' => '+v) : false;
+					return localStorage.setItem(k, v);
 				},
 
 				/**
@@ -400,8 +369,9 @@
 				 * @returns {Object|String|Boolean}
 				 */
 				retrieve: function(o, k){
-					(o.debug) ? _log.debug(o.logID, '_local.retrieve: '+k) : false;
-					return (localStorage.getItem(k)) ? true : false;
+                    var x = localStorage.getItem(k);
+					(o.debug) ? _log.debug(o.appID, '_local.retrieve: '+k+' => '+x) : false;
+					return (x) ? x : false;
 				}
 			},
 
@@ -424,8 +394,8 @@
 				 * @returns {Boolean}
 				 */
 				save: function(o, k, v){
-					(o.debug) ? _log.debug(o.logID, '_session.save: '+k+' => '+v) : false;
-					return (localStorage.setItem(k, v)) ? true : false;
+					(o.debug) ? _log.debug(o.appID, '_session.save: '+k+' => '+v) : false;
+					return localStorage.setItem(k, v);
 				},
 
 				/**
@@ -439,8 +409,9 @@
 				 * @returns {Object|String|Boolean}
 				 */
 				retrieve: function(o, k){
-					(o.debug) ? _log.debug(o.logID, '_session.retrieve: '+k) : false;
-					return (sessionStorage.getItem(k)) ? true : false;
+                    var x = sessionStorage.getItem(k);
+					(o.debug) ? _log.debug(o.appID, '_session.retrieve: '+k+' => '+x) : false;
+					return (x) ? x : false;
 				}
 			}
 		};
@@ -540,10 +511,10 @@
 			inspect: function(o, obj){
 				$.each(obj, function(x, y){
 					if ((/object|array/.test(typeof(y))) && (_libs.size(y) > 0)){
-						(o.debug) ? _log.debug(o.logID, '_libs.inspect: Examining '+x+' ('+typeof(y)+')') : false;
+						(o.debug) ? _log.debug(o.appID, '_libs.inspect: Examining '+x+' ('+typeof(y)+')') : false;
 						_libs.inspect(o, y);
 					} else {
-						(o.debug) ? _log.debug(o.logID, '_libs.inspect: '+x+' => '+y) : false;
+						(o.debug) ? _log.debug(o.appID, '_libs.inspect: '+x+' => '+y) : false;
 					}
 				});
 			},
@@ -579,7 +550,7 @@
 			 * @returns {Object}
 			 */
 			form: function(o, obj){
-				(o.debug) ? _log.debug(o.logID, '_libs.form: Retrieving form data') : false;
+				(o.debug) ? _log.debug(o.appID, '_libs.form: Retrieving form data') : false;
 				var _obj = {};
 				$.each(obj, function(k, v){
 					$.each(v, function(kk, vv){
