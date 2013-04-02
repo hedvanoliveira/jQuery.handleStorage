@@ -1,6 +1,3 @@
-[submodule "3rd-party/jquery-cookie"]
-	path = 3rd-party/jquery-cookie
-	url = https://github.com/carhartl/jquery-cookie.git
 [submodule "3rd-party/sjcl"]
 	path = 3rd-party/sjcl
 	url = https://github.com/bitwiseshiftleft/sjcl.git
