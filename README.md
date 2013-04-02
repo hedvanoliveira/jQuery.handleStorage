@@ -10,7 +10,6 @@ prior to form submission.
 
 ## REQUIREMENTS:
 * jQuery libraries (required - http://www.jquery.com)
-* jQuery cookie plugin (optional - https://github.com/carhartl/jquery-cookie)
 * SJCL libraries (optional - https://github.com/bitwiseshiftleft/sjcl)
 
 

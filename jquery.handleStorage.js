@@ -85,10 +85,10 @@
 			/**
 			 * @function save
 			 * @scope private
-			 * @abstract Primary initialization of window.crypto API
+			 * @abstract Initialization
 			 *
 			 * @param {Object} o Plug-in option object
-			 * @returns {Boolean} true/false
+			 * @returns {Boolean}
 			 */
 			init: function(o){
                 _log.init();
@@ -122,7 +122,11 @@
 			bind: function(o, d){
 				var _d = false;
 				if ((d).is('form')){
+
 					(o.debug) ? _log.debug(o.appID, '_setup.get: Currently bound to form ('+d.attr('id')+')') : false;
+
+                    _setup.restore(o, d.attr('id'));
+
 					$(d).on('submit', function(e){
 						e.preventDefault();
 						_d = _libs.form(o, d);
@@ -132,7 +136,23 @@
 					((o.debug) && (_d)) ? _log.debug(o.appID, '_setup.get: User supplied data specified') : false;
 				}
 				return _d;
-			}
+			},
+
+			/**
+			 * @function restore
+			 * @scope private
+			 * @abstract Restores data to specified element
+			 *
+			 * @param {Object} o Plug-in option object
+			 * @param {Object} k ID of DOM element
+
+			 * @returns {Object}
+			 */
+			restore: function(o, k){
+                var _e = _storage.retrieve(o, k);
+                if (_e)
+                    (/object/.test(_e)) ? _libs.inspect(o, _e) : false;
+            }
 		};
 
 		/**
@@ -158,7 +178,7 @@
 			 * @returns {Boolean}
 			 */
 			quota: function(i, t, d) {
-				var l = /default|local|session/.test(t) ? 1024 * 1025 * 5 : 1024 * 4;
+				var l = /local|session/.test(t) ? 1024 * 1025 * 5 : 1024 * 4;
 				var _t = l - unescape(encodeURIComponent(JSON.stringify(t))).length;
 				if (_t <= 0) {
 					_log.error(i, 'Maximum quota ('+l+'k) for '+t+' has been met, cannot continue');
@@ -188,12 +208,11 @@
                     /* merge/overwrite any existing object with new values */
                     var e = _storage.retrieve(o, k);
                     if (_libs.size(e) > 0) {
-                        e = (o.aes) ? _storage.fromJSON(sjcl.decrypt(o.uuid, _storage.toJSON(e))) : e;
                         $.extend(v, e);
                     }
 
 					/* encrypt object if AES is specified */
-                    v = (o.aes) ? sjcl.encrypt(o.uuid, _storage.toJSON(v)) : _storage.toJSON(v);
+                    v = (o.aes) ? sjcl.encrypt(o.uuid, _storage.fromJSON(v)) : _storage.fromJSON(v);
 
 					/* Save to specified storage mechanism */
 					switch(o.storage) {
@@ -223,7 +242,7 @@
 			 * @param {Object} o Default options
 			 * @param {String} k Storage key to use for indexing of newly saved string/object
 			 *
-			 * @returns {String|Object}
+			 * @returns {Object}
 			 */
 			retrieve: function(o, k){
 				var x = {};
@@ -244,32 +263,38 @@
 						break;
 				}
 
-				return (_libs.size(_storage.fromJSON(x)) > 0) ? _storage.fromJSON(x) : false;
-			},
+                if (x) {
+                    x = (o.aes) ? sjcl.decrypt(o.uuid, x) : x;
 
-			/**
-			 * @function toJSON
-			 * @scope private
-			 * @abstract Convert to JSON object
-			 *
-			 * @param {Object|Array|String} obj Object, Array or String to convert to JSON object
-			 *
-			 * @returns {Object}
-			 */
-			toJSON: function(obj){
-				return (/object/.test(typeof(obj))) ? JSON.stringify(obj) : obj;
+                    return (/string/.test(typeof(x))) ? _storage.toJSON(x) : x;
+                }
+
+				return false;
 			},
 
 			/**
 			 * @function fromJSON
 			 * @scope private
-			 * @abstract Object to stringify from JSON object
+			 * @abstract Convert to JSON object to string
 			 *
-			 * @param {Object} obj Object to convert from a JSON object
+			 * @param {Object|Array|String} obj Object, Array or String to convert to JSON object
 			 *
 			 * @returns {String}
 			 */
 			fromJSON: function(obj){
+				return (/object/.test(typeof(obj))) ? JSON.stringify(obj) : obj;
+			},
+
+			/**
+			 * @function toJSON
+			 * @scope private
+			 * @abstract Creates JSON object from formatted string
+			 *
+			 * @param {String} obj Object to convert to JSON object
+			 *
+			 * @returns {String}
+			 */
+			toJSON: function(obj){
 				return (/string/.test(typeof(obj))) ? JSON.parse(obj) : obj;
 			},
 
@@ -447,17 +472,17 @@
 			 * @returns {String}
 			 */
             uid: function(){
-                var _x = window.navigator.appName+
-                         window.navigator.appCodeName+
-                         window.navigator.product+
-                         window.navigator.productSub+
-                         window.navigator.appVersion+
-                         window.navigator.buildID+
-                         window.navigator.userAgent+
-                         window.navigator.language+
-                         window.navigator.platform+
-                         window.navigator.oscpu;
-                return _x.replace(/\s/, '');
+                var x = window.navigator.appName+
+                        window.navigator.appCodeName+
+                        window.navigator.product+
+                        window.navigator.productSub+
+                        window.navigator.appVersion+
+                        window.navigator.buildID+
+                        window.navigator.userAgent+
+                        window.navigator.language+
+                        window.navigator.platform+
+                        window.navigator.oscpu;
+                return x.replace(/\s/, '');
             },
 
 			/**
@@ -551,7 +576,9 @@
 			 * @returns {Object}
 			 */
 			form: function(o, obj){
+
 				(o.debug) ? _log.debug(o.appID, '_libs.form: Retrieving form data') : false;
+
 				var _obj = {};
 				$.each(obj, function(k, v){
 					$.each(v, function(kk, vv){
@@ -560,7 +587,9 @@
 						}
 					});
 				});
+
 				(o.debug) ? _libs.inspect(o, _obj) : false;
+
 				return (/object/.test(typeof(_obj))) ? JSON.stringify(_obj) : _obj;
 			},
 
@@ -574,10 +603,15 @@
 			 * @return {Array}
 			 */
 			selected: function(o, obj){
-				return $('#'+obj.name+':checked').map(function(){
+                var _r = [];
+				var _a = $('#'+obj.name+':checked').map(function(){
 					return this.value;
 				}).get();
-			},
+                $.each(_a, function(a, b){
+                    if ($.inArray(b, _r) === -1) _r.push(b);
+                });
+                return _r;
+            },
 
 			/**
 			 * @function guid
