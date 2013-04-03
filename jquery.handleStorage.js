@@ -92,8 +92,18 @@
 			 */
 			init: function(o){
                 _log.init();
+
+                /* handle pre-callback if specified */
+                ((o.preCallback)&&($.isFunction(o.preCallback))) ? o.preCallback($(this)) : false;
+
+                /* generate key if AES specified */
                 o.uuid = (o.aes) ? _crypto.key(o) : o.uuid;
-                return _setup.bind(o, o.element);
+
+                /* do it */
+                _setup.bind(o, o.element);
+
+                /* handle callback if specified */
+                ((o.callback)&&($.isFunction(o.callback))) ? o.callback($(this)) : false;
 			},
 
 			/**
@@ -130,9 +140,10 @@
 
 					$(d).on('submit', function(e){
 						e.preventDefault();
-						_d = _libs.form(o, d);
-                        _storage.save(o, d.attr('id'), _d);
+                        _storage.save(o, d.attr('id'), _libs.form(o, d));
 					});
+
+                    _d = true;
 				} else {
 					((o.debug) && (_d)) ? _log.debug(o.appID, '_setup.get: User supplied data specified') : false;
 				}
@@ -566,11 +577,11 @@
 
 				var _obj = {};
 
-                if (_libs.size(_obj) > 0){
+                if (_libs.size(obj) > 0){
     				$.each(obj, function(k, v){
     					$.each(v, function(kk, vv){
     						if ((vv.name) && (vv.value)){
-    							_obj[vv.name] = (/checkbox|radio/.test(vv.type)) ? _libs.rdupes(_libs.selected(o, vv)) : vv.value;
+    							_obj[vv.name] = (/checkbox|radio/.test(vv.type)) ? _libs.selected(o, vv) : vv.value;
     						}
     					});
     				});
@@ -591,9 +602,10 @@
 			 * @return {Array}
 			 */
 			selected: function(o, obj){
-				return $('#'+obj.name+':checked').map(function(){
+				var x = $('#'+obj.name+':checked').map(function(){
 					return this.value;
 				}).get();
+                return _libs.rdupes(x);
             },
 
             /**
@@ -621,19 +633,20 @@
 			 * @abstract Restores data to specified element
 			 *
 			 * @param {Object} o Plug-in option object
-			 * @param {Object} k ID of DOM element
+			 * @param {Object} i ID of DOM element
 
 			 * @returns {Object}
 			 */
-			restore: function(o, k){
-                var _e = _storage.retrieve(o, k.attr('id'));
+			restore: function(o, i){
+                var _e = _storage.retrieve(o, i.attr('id'));
 
                 if ((_e) && (_libs.size(_e) > 0)){
                     $.each(_e, function(k, v){
-
+                        (i.is('form')) ? $('#'+i.attr('id')+' #'+k).val(v) : $('#'+i.attr('id')+' #'+k).html(v);
                     });
+                } else {
+                    (i.is('form')) ? $('#'+i.attr('id')).val(_e) : $('#'+i.attr('id')).html(_e);
                 }
-
             },
 
 			/**

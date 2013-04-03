@@ -38,7 +38,7 @@
     //$j('#default').handleStorage({debug:true});
    });
   </script>
-  <div id="contact-form" class="clearfix">
+  <!--div id="contact-form" class="clearfix">
    <h3>Example using HTML5 localStorage</h3>
    <p>The default use is simple and uses persistent storage by implementing the HTML5 localStorage option</p>
    <form id="default" name="default" method="post" action="">
@@ -68,7 +68,7 @@
      <input type="submit" value="Save to localStorage & submit" id="submit-button" />
      <p id="req-field-desc"></p>
    </form>
-  </div>
+  </div-->
 
   <!-- example using sessionStorage -->
   <script>
@@ -77,7 +77,7 @@
     //$j('#sessions').handleStorage({storage:'sessionStorage'});
    });
   </script>
-  <div id="contact-form" class="clearfix">
+  <!--div id="contact-form" class="clearfix">
    <h3>Example using HTML5 sessionStorage</h3>
    <p>Using sessionStorage allows for persistent client storage ONLY while the users browser is open</p>
    <form id="sessions" name="sessions" method="post" action="">
@@ -107,7 +107,7 @@
      <input type="submit" value="Save to sessionStorage & submit" id="submit-button" />
      <p id="req-field-desc"></p>
    </form>
-  </div>
+  </div-->
 
   <!-- example using cookies -->
   <script>
@@ -116,7 +116,7 @@
     //$j('#cookies').handleStorage({storage:'cookies'});
    });
   </script>
-  <div id="contact-form" class="clearfix">
+  <!--div id="contact-form" class="clearfix">
    <h3>Example using cookies (for non-HTML5 compliant browsers, auto-fallback)</h3>
    <p>For those users that are still using older browsers option cookie storage is available but requires the jquery cookie plugin (see above for URL)</p>
    <form id="cookies" name="cookies" method="post" action="">
@@ -146,7 +146,7 @@
      <input type="submit" value="Save to cookie & submit" id="submit-button" />
      <p id="req-field-desc"></p>
    </form>
-  </div>
+  </div-->
 
   <!-- example using AES encrypted localStorage -->
   <script>
@@ -194,7 +194,7 @@
     //$j('#sessions-aes').handleStorage({storage:'sessionStorage',aes:true});
    });
   </script>
-  <div id="contact-form" class="clearfix">
+  <!--div id="contact-form" class="clearfix">
    <h3>Example using HTML5 sessionStorage with AES encryption</h3>
    <p>This example provides the best security of client storage data as the client closes their browser the data gets reset and while the users browser is open the data is encrypted with the AES-CBC cipher</p>
    <form id="sessions-aes" name="sessions-aes" method="post" action="">
@@ -224,7 +224,7 @@
      <input type="submit" value="Encrypt, save to sessionStorage & submit" id="submit-button" />
      <p id="req-field-desc"></p>
    </form>
-  </div>
+  </div-->
 
   <!-- example using AES encrypted localStorage -->
   <script>
@@ -233,7 +233,7 @@
     //$j('#cookies-aes').handleStorage({storage:'cookies',aes:true});
    });
   </script>
-  <div id="contact-form" class="clearfix">
+  <!--div id="contact-form" class="clearfix">
    <h3>Example using cookies with AES encryption</h3>
    <p>An example using AES-CBC encryption with degraded cookie support.</p>
    <form id="cookies-aes" name="cookies-aes" method="post" action="">
@@ -263,7 +263,7 @@
      <input type="submit" value="Encrypt, save to cookie & submit" id="submit-button" />
      <p id="req-field-desc"></p>
    </form>
-  </div>
+  </div-->
 
   <!-- default options with success callback -->
   <script>
@@ -272,7 +272,7 @@
     //$j('#default-success').handleStorage({callback:function(){$j('#default-success').append('Form data saved successfully');}});
    });
   </script>
-  <div id="contact-form" class="clearfix">
+  <!--div id="contact-form" class="clearfix">
    <h3>Example using defaults with success callback function</h3>
    <p>You may wish to alert the user that form data was saved or even call an AJAX style function of syncing data to a remote server</p>
    <form id="default-success" name="default-success" method="post" action="">
@@ -302,7 +302,7 @@
      <input type="submit" value="Save & callback function on success" id="submit-button" />
      <p id="req-field-desc"></p>
    </form>
-  </div>
+  </div-->
 
   <!-- default options with pre save callback -->
   <script>
@@ -311,7 +311,7 @@
     //$j('#default-pre').handleStorage({preCallback:function(){$j('#default-pre').append('Executing prior to form save');}});
    });
   </script>
-  <div id="contact-form" class="clearfix">
+  <!--div id="contact-form" class="clearfix">
    <h3>Example using defaults with pre-save callback function</h3>
    <p>This example could be used to load simple spinner or other message alerting the user form data is about to be saved</p>
    <form id="default-pre" name="default-pre" method="post" action="">
@@ -341,7 +341,7 @@
      <input type="submit" value="Execute callback & save form" id="submit-button" />
      <p id="req-field-desc"></p>
    </form>
-  </div>
+  </div-->
 
   <!-- default options with on error callback -->
   <script>
@@ -350,7 +350,7 @@
     //$j('#default-error').handleStorage({errCallback:function(){$j('#default-error').append('An error occured during save, this should not happen');}});
    });
   </script>
-  <div id="contact-form" class="clearfix">
+  <!--div id="contact-form" class="clearfix">
    <h3>Example using defaults with an on error callback function</h3>
    <p>Here we anticipate problems with auto-form saves by executing a callback to handle and alert the user there was a problem. This should never happen but then again neither should movies about troll hunting.</p>
    <form id="default-error" name="default-error" method="post" action="">
@@ -380,7 +380,7 @@
      <input type="submit" value="Encrypt, save to cookie & submit" id="submit-button" />
      <p id="req-field-desc"></p>
    </form>
-  </div>
+  </div-->
  </div>
 </body>
 </html>
