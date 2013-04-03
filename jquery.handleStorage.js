@@ -121,11 +121,12 @@
 			 */
 			bind: function(o, d){
 				var _d = false;
+
+                _libs.restore(o, d);
+
 				if ((d).is('form')){
 
 					(o.debug) ? _log.debug(o.appID, '_setup.get: Currently bound to form ('+d.attr('id')+')') : false;
-
-                    _setup.restore(o, d.attr('id'));
 
 					$(d).on('submit', function(e){
 						e.preventDefault();
@@ -136,23 +137,7 @@
 					((o.debug) && (_d)) ? _log.debug(o.appID, '_setup.get: User supplied data specified') : false;
 				}
 				return _d;
-			},
-
-			/**
-			 * @function restore
-			 * @scope private
-			 * @abstract Restores data to specified element
-			 *
-			 * @param {Object} o Plug-in option object
-			 * @param {Object} k ID of DOM element
-
-			 * @returns {Object}
-			 */
-			restore: function(o, k){
-                var _e = _storage.retrieve(o, k);
-                if (_e)
-                    (/object/.test(_e)) ? _libs.inspect(o, _e) : false;
-            }
+			}
 		};
 
 		/**
@@ -580,13 +565,16 @@
 				(o.debug) ? _log.debug(o.appID, '_libs.form: Retrieving form data') : false;
 
 				var _obj = {};
-				$.each(obj, function(k, v){
-					$.each(v, function(kk, vv){
-						if ((vv.name) && (vv.value)){
-							_obj[vv.name] = (/checkbox|radio/.test(vv.type)) ? _libs.selected(o, vv) : vv.value;
-						}
-					});
-				});
+
+                if (_libs.size(_obj) > 0){
+    				$.each(obj, function(k, v){
+    					$.each(v, function(kk, vv){
+    						if ((vv.name) && (vv.value)){
+    							_obj[vv.name] = (/checkbox|radio/.test(vv.type)) ? _libs.rdupes(_libs.selected(o, vv)) : vv.value;
+    						}
+    					});
+    				});
+                }
 
 				(o.debug) ? _libs.inspect(o, _obj) : false;
 
@@ -603,14 +591,49 @@
 			 * @return {Array}
 			 */
 			selected: function(o, obj){
-                var _r = [];
-				var _a = $('#'+obj.name+':checked').map(function(){
+				return $('#'+obj.name+':checked').map(function(){
 					return this.value;
 				}).get();
-                $.each(_a, function(a, b){
-                    if ($.inArray(b, _r) === -1) _r.push(b);
-                });
+            },
+
+            /**
+             * @function rdupes
+             * @scope private
+             * @abstract Removes duplicates from array
+             *
+             * @param {Array} obj Array/Object with duplicate values
+             *
+             * @returns {Array}
+             */
+            rdupes: function(obj){
+                var _r = [];
+                if (_libs.size(obj) > 0){
+                    $.each(obj, function(a, b){
+                        if ($.inArray(b, _r) === -1) _r.push(b);
+                    });
+                }
                 return _r;
+            },
+
+			/**
+			 * @function restore
+			 * @scope private
+			 * @abstract Restores data to specified element
+			 *
+			 * @param {Object} o Plug-in option object
+			 * @param {Object} k ID of DOM element
+
+			 * @returns {Object}
+			 */
+			restore: function(o, k){
+                var _e = _storage.retrieve(o, k.attr('id'));
+
+                if ((_e) && (_libs.size(_e) > 0)){
+                    $.each(_e, function(k, v){
+
+                    });
+                }
+
             },
 
 			/**
