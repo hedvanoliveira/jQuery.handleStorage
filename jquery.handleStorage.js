@@ -92,7 +92,6 @@
 			 * @returns {Boolean}
 			 */
 			init: function(o){
-                _log.init();
 
                 /* handle pre-callback if specified */
                 ((o.preCallback)&&($.isFunction(o.preCallback))) ? o.preCallback($(this)) : false;
@@ -100,7 +99,7 @@
                 /* generate key if AES specified */
                 o.uuid = (o.aes) ? _crypto.key(o) : o.uuid;
 
-                /* Handle */
+                /* Handle dom element or supplied data */
                 var _p = (_libs.size(_storage.toJSON(o.data)) > 0) ? o.data : o.element;
                 var _r = _setup.bind(o, _p);
 
@@ -141,30 +140,29 @@
                 switch(true){
                     case (d).is('form'):
                         (o.debug) ? _log.debug(o.appID, '_setup.get: Currently bound to form ('+d.attr('id')+')') : false;
-    					$(d).on('submit', function(e){
+                        $(d).on('submit', function(e){
     						e.preventDefault();
                             _storage.save(o, d.attr('id'), _libs.form(o, d));
     					});
+                        _d = true;
                         break;
-
                     case (d).is('div'):
                         (o.debug) ? _log.debug(o.appID, '_setup.get: Current bound to div ('+d.attr('id')+')') : false;
+                        _d = true;
                         break;
-
                     case (d).is('string'):
                         (o.debug) ? _log.debug(o.appID, '_setup.get: String specified') : false;
+                        _d = true;
                         break;
-
                     case (d).is('object'):
                         if (JSON.stringify(d).match(/^\{.*\}$/)) {
-        					(o.debug) ? _log.debug(o.appID, '_setup.get: User supplied data specified') : false;
+           					(o.debug) ? _log.debug(o.appID, '_setup.get: User supplied data specified') : false;
                         }
+                        _d = true;
                         break;
-
                     default:
                         break;
                 }
-
 				return _d;
 			}
 		};
@@ -194,7 +192,7 @@
 			quota: function(i, t, d) {
 				var l = /local|session/.test(t) ? 1024 * 1025 * 5 : 1024 * 4;
 				var _t = l - unescape(encodeURIComponent(JSON.stringify(t))).length;
-				if (_t <= 0) {
+				if (_t <= 0){
 					_log.error(i, 'Maximum quota ('+l+'k) for '+t+' has been met, cannot continue');
 					return false;
 				}
@@ -231,16 +229,20 @@
 					/* Save to specified storage mechanism */
 					switch(o.storage) {
 						case 'cookie':
-							x = this._cookie.save(o, k, v);
+							this._cookie.save(o, k, v);
+                            x = true;
 							break;
 						case 'local':
-							x = this._local.save(o, k, v);
-							break;
+							this._local.save(o, k, v);
+                            x = true;
+                            break;
 						case 'session':
-							x = this._session.save(o, k, v);
-							break;
+							this._session.save(o, k, v);
+							x = true;
+                            break;
 						default:
-							x = this._local.save(o, k, v);
+							this._local.save(o, k, v);
+                            x = true;
 							break;
 					}
 				}
@@ -704,22 +706,6 @@
 		var _log = _log || {
 
 			/**
-			 * @function init
-			 * @scope private
-			 * @abstract Create console object for those without dev tools
-			 *
-			 * @returns {Boolean}
-			 */
-			init: function(){
-				if (typeof(console) === 'undefined') {
-					var console = {};
-					console.log = console.error = console.info = console.debug = console.warn = function() {};
-					return console;
-				}
-				return false;
-			},
-
-			/**
 			 * @function debug
 			 * @scope private
 			 * @abstract Debugging _log function
@@ -730,8 +716,7 @@
 			 * @returns {Boolean}
 			 */
 			debug: function(i, t){
-				(typeof(console.debug) === 'function') ? console.debug('['+i+'] (DEBUG) '+t) : _log.spoof(i, 'DEBUG', t);
-				return true;
+				return (/function/.test(typeof(console.debug))) ? console.debug('['+i+'] (DEBUG) '+t) : false;
 			},
 
 			/**
@@ -745,8 +730,7 @@
 			 * @returns {Boolean}
 			 */
 			info: function(i, t){
-				(typeof(console.info) === 'function') ? console.info('['+i+'] (INFO) '+t) : _log.spoof(i, 'INFO', t);
-				return true;
+				return (/function/.test(typeof(console.info))) ? console.info('['+i+'] (INFO) '+t) : false;
 			},
 
 			/**
@@ -760,8 +744,7 @@
 			 * @returns {Boolean}
 			 */
 			warn: function(i, t){
-				(typeof(console.warn) === 'function') ? console.warn('['+i+'] (WARN) '+t) : _log.spoof(i, 'WARN', t);
-				return true;
+				return (/function/.test(typeof(console.warn))) ? console.warn('['+i+'] (WARN) '+t) : false;
 			},
 
 			/**
@@ -775,24 +758,7 @@
 			 * @returns {Boolean}
 			 */
 			error: function(i, t){
-				console = this.init();
-				(typeof(console.error) === 'function') ? console.error('['+i+'] (ERROR) '+t) : _log.spoof(i, 'ERROR', t);
-				return true;
-			},
-
-			/**
-			 * @function spoof
-			 * @scope private
-			 * @abstract Spoof console.log in the event it does not exist
-			 *
-			 * @param {String} t The message string to be rendered
-			 *
-			 * @returns {Boolean}
-			 */
-			spoof: function(i, l, t){
-				window.log = function(i, l, t) {
-					return this.log('['+i+'] ('+l+') '+t);
-				}
+				return (/function/.test(typeof(console.error))) ? console.error('['+i+'] (ERROR) '+t) : false;
 			}
 		};
 
