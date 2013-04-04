@@ -68,6 +68,7 @@
 
 				/* Initialize setup */
 				if (!_setup.init(opts)) {
+                    _log.error(o.appID, 'init: An error occured during initialization');
 					return false;
 				}
 
@@ -99,11 +100,14 @@
                 /* generate key if AES specified */
                 o.uuid = (o.aes) ? _crypto.key(o) : o.uuid;
 
-                /* do it */
-                _setup.bind(o, o.element);
+                /* Handle */
+                var _p = (_libs.size(_storage.toJSON(o.data)) > 0) ? o.data : o.element;
+                var _r = _setup.bind(o, _p);
 
                 /* handle callback if specified */
                 ((o.callback)&&($.isFunction(o.callback))) ? o.callback($(this)) : false;
+
+                return _r;
 			},
 
 			/**
@@ -134,19 +138,33 @@
 
                 _libs.restore(o, d);
 
-				if ((d).is('form')){
+                switch(true){
+                    case (d).is('form'):
+                        (o.debug) ? _log.debug(o.appID, '_setup.get: Currently bound to form ('+d.attr('id')+')') : false;
+    					$(d).on('submit', function(e){
+    						e.preventDefault();
+                            _storage.save(o, d.attr('id'), _libs.form(o, d));
+    					});
+                        break;
 
-					(o.debug) ? _log.debug(o.appID, '_setup.get: Currently bound to form ('+d.attr('id')+')') : false;
+                    case (d).is('div'):
+                        (o.debug) ? _log.debug(o.appID, '_setup.get: Current bound to div ('+d.attr('id')+')') : false;
+                        break;
 
-					$(d).on('submit', function(e){
-						e.preventDefault();
-                        _storage.save(o, d.attr('id'), _libs.form(o, d));
-					});
+                    case (d).is('string'):
+                        (o.debug) ? _log.debug(o.appID, '_setup.get: String specified') : false;
+                        break;
 
-                    _d = true;
-				} else {
-					((o.debug) && (_d)) ? _log.debug(o.appID, '_setup.get: User supplied data specified') : false;
-				}
+                    case (d).is('object'):
+                        if (JSON.stringify(d).match(/^\{.*\}$/)) {
+        					(o.debug) ? _log.debug(o.appID, '_setup.get: User supplied data specified') : false;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
 				return _d;
 			}
 		};
@@ -259,12 +277,13 @@
 						break;
 				}
 
-                if (x) {
+                if (_libs.size(_storage.toJSON(x)) > 0) {
                     x = (o.aes) ? sjcl.decrypt(o.uuid, x) : x;
 
                     return (/string/.test(typeof(x))) ? _storage.toJSON(x) : x;
                 }
 
+                (o.debug) ? _log.debug(o.appID, '_storage.retrieve: An error occured retrieving "'+k+'" from "'+o.storage+'"') : false;
 				return false;
 			},
 
