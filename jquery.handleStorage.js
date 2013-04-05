@@ -99,6 +99,13 @@
                 /* generate key if AES specified */
                 o.uuid = (o.aes) ? _crypto.key(o) : o.uuid;
 
+                /* Perform auto-save */
+                setInterval(function(){
+                    (o.debug) ? _log.debug(o.appID, '_setup.init: Auto-save initialized') : false;
+                    _storage.save(o, o.element.attr('id'), _libs.form(o, o.element));
+                    return true;
+                }, o.interval);
+
                 /* Handle dom element or supplied data */
                 var _p = (_libs.size(_storage.toJSON(o.data)) > 0) ? o.data : o.element;
                 var _r = _setup.bind(o, _p);
@@ -139,24 +146,24 @@
 
                 switch(true){
                     case (d).is('form'):
-                        (o.debug) ? _log.debug(o.appID, '_setup.get: Currently bound to form ('+d.attr('id')+')') : false;
+                        (o.debug) ? _log.debug(o.appID, '_setup.bind: Currently bound to form ('+d.attr('id')+')') : false;
                         $(d).on('submit', function(e){
-    						e.preventDefault();
+                            e.preventDefault();
                             _storage.save(o, d.attr('id'), _libs.form(o, d));
-    					});
+                        });
                         _d = true;
                         break;
                     case (d).is('div'):
-                        (o.debug) ? _log.debug(o.appID, '_setup.get: Current bound to div ('+d.attr('id')+')') : false;
+                        (o.debug) ? _log.debug(o.appID, '_setup.bind: Current bound to div ('+d.attr('id')+')') : false;
                         _d = true;
                         break;
                     case (d).is('string'):
-                        (o.debug) ? _log.debug(o.appID, '_setup.get: String specified') : false;
+                        (o.debug) ? _log.debug(o.appID, '_setup.bind: String specified') : false;
                         _d = true;
                         break;
                     case (d).is('object'):
                         if (JSON.stringify(d).match(/^\{.*\}$/)) {
-           					(o.debug) ? _log.debug(o.appID, '_setup.get: User supplied data specified') : false;
+           					(o.debug) ? _log.debug(o.appID, '_setup.bind: User supplied data specified') : false;
                         }
                         _d = true;
                         break;
