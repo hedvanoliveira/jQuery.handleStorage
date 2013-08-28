@@ -99,15 +99,15 @@
                 /* generate key if AES specified */
                 o.uuid = (o.aes) ? _crypto.key(o) : o.uuid;
 
+                var _p = (_libs.size(_storage.toJSON(o.data)) > 0) ? o.data : o.element;
+
                 /* Perform auto-save */
                 setInterval(function(){
                     (o.debug) ? _log.debug(o.appID, '_setup.init: Auto-save initialized') : false;
-                    _storage.save(o, o.element.attr('id'), _libs.form(o, o.element));
-                    return true;
+		                return _setup.bind(o, _p);
                 }, o.interval);
 
                 /* Handle dom element or supplied data */
-                var _p = (_libs.size(_storage.toJSON(o.data)) > 0) ? o.data : o.element;
                 var _r = _setup.bind(o, _p);
 
                 /* handle callback if specified */
