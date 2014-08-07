@@ -1,3 +1,5 @@
+# Depreciated, succeeded by [secStore.js](https://github.com/jas-/secStore.js)
+
 #jQuery plugin to impliment HTML5 form storage
 
 Supports HTML5 localStorage, sessionStorage or cookie support
